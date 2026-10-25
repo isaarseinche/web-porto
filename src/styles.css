@@ -1,0 +1,2468 @@
+/* =====================================================================
+   Token desain "Live Signal"
+   Latar = soldermask PCB, teks = sablon PCB, tembaga = pad & tombol,
+   biru = nyala metana (dipakai khusus untuk data).
+   ===================================================================== */
+:root {
+  --board: #0e2b22;
+  --board-raised: #133a2d;
+  --board-inset: #0a2019;
+  --trace: #2a5a47;
+  --silk: #eef1e8;
+  --silk-dim: #a9bdb2;
+  --copper: #d9a05b;
+  --copper-hover: #e8b678;
+  --flame: #6cb8ff;
+  --lcd: #b9d86a;
+  --lcd-ink: #22351a;
+
+  --font: 'Archivo Variable', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --lebar: 76rem;
+  --gutter: clamp(1.25rem, 4vw, 2.5rem);
+  --radius: 10px;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-padding-top: 5.5rem;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--board);
+  color: var(--silk);
+  font-family: var(--font);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+  overflow-x: hidden;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--copper);
+  color: var(--board);
+}
+
+:focus-visible {
+  outline: 2px solid var(--flame);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  background: var(--copper);
+  color: var(--board);
+  border-radius: 6px;
+}
+
+.skip:focus {
+  top: 1rem;
+}
+
+.redup {
+  color: var(--silk-dim);
+}
+
+/* Jejak PCB samar di belakang hero */
+.jejak {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 115vh;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' fill='none' stroke='%23295845' stroke-width='1.5'%3E%3Cpath d='M0 40h70l30 30h60l30-30h50'/%3E%3Cpath d='M180 0v80l-24 24v40l24 24v72'/%3E%3Cpath d='M30 150h50l20 20h28'/%3E%3Ccircle cx='70' cy='40' r='3.5'/%3E%3Ccircle cx='156' cy='104' r='3.5'/%3E%3Ccircle cx='30' cy='150' r='4' fill='%23295845'/%3E%3Ccircle cx='128' cy='170' r='4' fill='%23295845'/%3E%3C/svg%3E");
+  background-size: 240px;
+  mask-image: radial-gradient(120% 80% at 85% 10%, #000 20%, transparent 70%);
+}
+
+/* Jejak yang menyala biru di sekitar mouse (posisi --mx/--my diatur CahayaJejak.jsx) */
+.jejak--nyala {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' fill='none' stroke='%236cb8ff' stroke-width='1.5'%3E%3Cpath d='M0 40h70l30 30h60l30-30h50'/%3E%3Cpath d='M180 0v80l-24 24v40l24 24v72'/%3E%3Cpath d='M30 150h50l20 20h28'/%3E%3Ccircle cx='70' cy='40' r='3.5'/%3E%3Ccircle cx='156' cy='104' r='3.5'/%3E%3Ccircle cx='30' cy='150' r='4' fill='%236cb8ff'/%3E%3Ccircle cx='128' cy='170' r='4' fill='%236cb8ff'/%3E%3C/svg%3E");
+  mask-image: radial-gradient(
+    circle 180px at var(--mx, -999px) var(--my, -999px),
+    #000 0%,
+    rgb(0 0 0 / 0.45) 45%,
+    transparent 100%
+  );
+}
+
+/* Lebar konten yang sama untuk semua bagian */
+.hero,
+.blok,
+.replay__kepala,
+.replay__panel,
+.replay__kaki,
+.kontak__atas,
+.kaki__isi {
+  width: min(var(--lebar), 100% - 2 * var(--gutter));
+  margin-inline: auto;
+}
+
+/* ---------- Tombol ---------- */
+.tombol {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--copper);
+  background: var(--copper);
+  color: var(--board);
+  font-weight: 650;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.tombol:hover {
+  background: var(--copper-hover);
+  border-color: var(--copper-hover);
+}
+
+.tombol--garis {
+  background: transparent;
+  border-color: var(--silk-dim);
+  color: var(--silk);
+}
+
+.tombol--garis:hover {
+  background: var(--board-raised);
+  border-color: var(--silk);
+}
+
+.tombol--kecil {
+  padding: 0.5rem 1rem;
+  font-size: 0.9375rem;
+}
+
+/* ---------- Navigasi ---------- */
+.nav {
+  position: fixed;
+  inset: 0.9rem 0 auto 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  padding-inline: var(--gutter);
+  pointer-events: none;
+}
+
+.nav__pill {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  width: min(var(--lebar), 100%);
+  padding: 0.4rem 0.4rem 0.4rem 1.2rem;
+  border: 1px solid var(--trace);
+  border-radius: 999px;
+  background: rgb(14 43 34 / 0.8);
+  backdrop-filter: blur(12px);
+}
+
+.nav__nama {
+  font-weight: 700;
+  font-stretch: 85%;
+  font-size: 1.0625rem;
+  text-decoration: none;
+  margin-right: auto;
+}
+
+.nav__tautan {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.9375rem;
+}
+
+.nav__tautan a {
+  color: var(--silk-dim);
+  text-decoration: none;
+}
+
+.nav__tautan a:hover {
+  color: var(--silk);
+}
+
+@media (max-width: 760px) {
+  .nav__tautan {
+    display: none;
+  }
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  column-gap: clamp(1rem, 3vw, 3rem);
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-top: clamp(6.5rem, 14vh, 9rem);
+}
+
+.hero__teks {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  padding-bottom: clamp(3rem, 7vw, 5rem);
+}
+
+.hero__status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--silk-dim);
+  font-size: 0.9375rem;
+  margin-bottom: 1.25rem;
+}
+
+.titik-hidup {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--flame);
+  box-shadow: 0 0 0 4px rgb(108 184 255 / 0.18), 0 0 14px rgb(108 184 255 / 0.6);
+}
+
+.hero__nama {
+  font-size: clamp(3.25rem, 7.8vw, 8.25rem);
+  font-stretch: 62%;
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+  cursor: default;
+}
+
+.hero__baris {
+  display: block;
+  white-space: nowrap;
+}
+
+.hero__baris + .hero__baris {
+  color: var(--silk-dim);
+}
+
+.hero__peran {
+  font-stretch: 125%;
+  font-weight: 500;
+  font-size: 1.0625rem;
+  color: var(--copper);
+  margin-bottom: 0.75rem;
+}
+
+.hero__tagline {
+  font-size: clamp(1.75rem, 3.4vw, 2.625rem);
+  font-weight: 650;
+  font-stretch: 90%;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.hero__ringkas {
+  max-width: 34rem;
+  color: var(--silk-dim);
+  margin-bottom: 1.75rem;
+}
+
+.hero__aksi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.hero__lokasi {
+  font-size: 0.9375rem;
+  color: var(--silk-dim);
+}
+
+/* Foto profil: berdiri di dasar hero, memudar ke bawah */
+.hero__foto {
+  position: relative;
+  isolation: isolate;
+  align-self: end;
+  justify-self: center;
+  width: min(100%, 34rem);
+}
+
+.hero__foto::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 6%;
+  width: 85%;
+  aspect-ratio: 1;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(108 184 255 / 0.2), transparent);
+}
+
+/* Wadah seukuran gambar, supaya efek pemindai pas dengan siluet */
+.hero__bingkai {
+  position: relative;
+  width: min(100%, calc((100svh - 7rem) * 800 / 1029));
+  aspect-ratio: 800 / 1029;
+  margin-inline: auto;
+}
+
+.hero__bingkai img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  mask-image: linear-gradient(to bottom, #000 70%, transparent 98%);
+}
+
+/* Label bergaya callout gambar teknik, di samping kepala */
+.hero__foto figcaption {
+  position: absolute;
+  left: -4.5rem;
+  top: 13%;
+  max-width: 9.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--silk-dim);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--silk-dim);
+}
+
+.hero__foto figcaption::after {
+  content: '';
+  position: absolute;
+  left: 100%;
+  bottom: -1px;
+  width: 2rem;
+  border-top: 1px solid var(--silk-dim);
+  transform-origin: left;
+  rotate: 24deg;
+}
+
+/* ---------- Pemindai foto hero ----------
+   Satu siklus (--siklus-pindai) berisi:
+     sapuan turun penuh → naik ke wajah → koreksi kecil → MENGUNCI wajah
+     (kotak fokus muncul & berkedip, bingkai merapat, sinar menguat)
+     → sapuan turun penuh → naik penuh → diam sebentar → berulang.
+   Ubah --siklus-pindai untuk mempercepat/memperlambat seluruh pola.
+   Semua bagian memakai siklus yang sama agar selaras. Hanya transform &
+   opacity yang dianimasikan (dikerjakan GPU), dan semuanya dijeda saat hero
+   tidak terlihat (.hero--diam diatur Hero.jsx). */
+.pindai {
+  --siklus-pindai: 15s;
+  --kunci: 30%; /* posisi garis saat mengunci wajah (setinggi mata) */
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Wadah bergerak: setinggi jangkauan pindai (2%–86% tinggi foto),
+   digeser 0–100% dari tingginya sendiri oleh keyframes pindai-jalur. */
+.pindai__jalur {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 2%;
+  height: 84%;
+  will-change: transform;
+  animation: pindai-jalur var(--siklus-pindai) linear infinite;
+}
+
+/* Lapisan yang dipotong mengikuti siluet foto (mask diatur di Hero.jsx) */
+.pindai__tubuh {
+  position: absolute;
+  inset: 0;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+}
+
+/* Pita cahaya bertekstur garis halus yang "menyinari" tubuh */
+.pindai__sinar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -3.75rem;
+  height: 7.5rem;
+  background:
+    repeating-linear-gradient(to bottom, rgb(150 205 255 / 0.32) 0 1px, transparent 1px 4px),
+    linear-gradient(to bottom, transparent, rgb(108 184 255 / 0.34) 50%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
+  opacity: 0.7;
+  will-change: opacity;
+  animation: pindai-sinar var(--siklus-pindai) linear infinite;
+}
+
+/* Garis pemindai: hanya di dalam bingkai, memudar di kedua ujung */
+.pindai__garis {
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  top: -1px;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--flame) 14%,
+    #dff1ff 50%,
+    var(--flame) 86%,
+    transparent
+  );
+}
+
+/* Pendar lembut di sekitar garis */
+.pindai__garis::after {
+  content: '';
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: -6px;
+  height: 14px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgb(108 184 255 / 0.45) 20%,
+    rgb(108 184 255 / 0.45) 80%,
+    transparent
+  );
+  filter: blur(5px);
+}
+
+/* Bingkai jendela bidik yang "bernapas" */
+.pindai__rangka {
+  position: absolute;
+  inset: -1% 2% 12% 2%;
+  will-change: transform;
+  animation: pindai-napas var(--siklus-pindai) linear infinite;
+}
+
+.pindai__sudut {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 0 solid rgb(108 184 255 / 0.85);
+}
+
+.pindai__sudut--1 { top: 0; left: 0; border-top-width: 2px; border-left-width: 2px; border-top-left-radius: 4px; }
+.pindai__sudut--2 { top: 0; right: 0; border-top-width: 2px; border-right-width: 2px; border-top-right-radius: 4px; }
+.pindai__sudut--3 { bottom: 0; left: 0; border-bottom-width: 2px; border-left-width: 2px; border-bottom-left-radius: 4px; }
+.pindai__sudut--4 { bottom: 0; right: 0; border-bottom-width: 2px; border-right-width: 2px; border-bottom-right-radius: 4px; }
+
+/* Kotak fokus di wajah (sudut-sudut digambar dengan gradien) */
+.pindai__fokus {
+  --c: rgb(238 241 232 / 0.95);
+  --p: 14px;
+  position: absolute;
+  left: 31%;
+  top: 14%;
+  width: 38%;
+  height: 27%;
+  background:
+    linear-gradient(var(--c), var(--c)) left top / var(--p) 2px,
+    linear-gradient(var(--c), var(--c)) left top / 2px var(--p),
+    linear-gradient(var(--c), var(--c)) right top / var(--p) 2px,
+    linear-gradient(var(--c), var(--c)) right top / 2px var(--p),
+    linear-gradient(var(--c), var(--c)) left bottom / var(--p) 2px,
+    linear-gradient(var(--c), var(--c)) left bottom / 2px var(--p),
+    linear-gradient(var(--c), var(--c)) right bottom / var(--p) 2px,
+    linear-gradient(var(--c), var(--c)) right bottom / 2px var(--p);
+  background-repeat: no-repeat;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: pindai-fokus var(--siklus-pindai) linear infinite;
+}
+
+.hero--diam .pindai__jalur,
+.hero--diam .pindai__sinar,
+.hero--diam .pindai__rangka,
+.hero--diam .pindai__fokus {
+  animation-play-state: paused;
+}
+
+/* Posisi garis: translateY(0) = atas, translateY(100%) = paling bawah,
+   var(--kunci) = setinggi mata. Setiap baris memakai percepatan-perlambatan halus. */
+@keyframes pindai-jalur {
+  0%, 4% { transform: translateY(0); animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  22% { transform: translateY(100%); animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  36% { transform: translateY(calc(var(--kunci) - 6%)); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  41% { transform: translateY(calc(var(--kunci) + 6%)); animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1); }
+  45%, 57% { transform: translateY(var(--kunci)); animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  77% { transform: translateY(100%); animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  95%, 100% { transform: translateY(0); }
+}
+
+@keyframes pindai-sinar {
+  0%, 43% { opacity: 0.7; }
+  47%, 55% { opacity: 1; }
+  59%, 100% { opacity: 0.7; }
+}
+
+@keyframes pindai-napas {
+  0%, 4% { transform: scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  22% { transform: scale(1.02); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  36% { transform: scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  45%, 55% { transform: scale(0.975); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  61% { transform: scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  77% { transform: scale(1.02); animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1); }
+  95%, 100% { transform: scale(1); }
+}
+
+/* Kotak fokus muncul saat mengunci, berkedip dua kali seperti autofokus */
+@keyframes pindai-fokus {
+  0%, 44% { opacity: 0; transform: scale(1.25); animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); }
+  47.5% { opacity: 1; transform: scale(1); }
+  48.5% { opacity: 0.35; }
+  49.5% { opacity: 1; }
+  50.5% { opacity: 0.35; }
+  51.5%, 55% { opacity: 1; transform: scale(1); animation-timing-function: ease-in; }
+  59%, 100% { opacity: 0; transform: scale(0.94); }
+}
+
+@media (max-width: 860px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: auto;
+    padding-top: 5.25rem;
+  }
+
+  .hero__foto {
+    grid-row: 1;
+    width: min(80%, 21rem);
+    justify-self: end;
+    margin-bottom: -6rem;
+  }
+
+  .hero__bingkai {
+    width: min(100%, calc(52svh * 800 / 1029));
+  }
+
+  .pindai__sudut {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Di HP bagian bawah foto tertimpa nama besar, jadi jangkauan pindai
+     dipendekkan (2%–72%) dan posisi kunci disesuaikan agar tetap di mata. */
+  .pindai {
+    --kunci: 36%;
+  }
+
+  .pindai__jalur {
+    height: 70%;
+  }
+
+  .pindai__rangka {
+    inset: -1% 2% 29% 2%;
+  }
+
+  .hero__foto figcaption {
+    display: none;
+  }
+
+  .hero__teks {
+    padding-bottom: 4rem;
+  }
+}
+
+/* ---------- Intro (layar pembuka) ----------
+   Durasi gerakan diambil dari src/data/waktuIntro.js lewat variabel CSS
+   (--lama-huruf-masuk, --geser-halo, dst.). Ubah angkanya di file itu. */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--board);
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--lama-tutup, 700ms) cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.intro::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' fill='none' stroke='%23295845' stroke-width='1.5'%3E%3Cpath d='M0 40h70l30 30h60l30-30h50'/%3E%3Cpath d='M180 0v80l-24 24v40l24 24v72'/%3E%3Cpath d='M30 150h50l20 20h28'/%3E%3Ccircle cx='70' cy='40' r='3.5'/%3E%3Ccircle cx='156' cy='104' r='3.5'/%3E%3Ccircle cx='30' cy='150' r='4' fill='%23295845'/%3E%3Ccircle cx='128' cy='170' r='4' fill='%23295845'/%3E%3C/svg%3E");
+  background-size: 240px;
+  mask-image: radial-gradient(circle at 50% 50%, transparent 20%, #000 80%);
+  opacity: 0.6;
+}
+
+/* Garis biru yang ikut naik saat intro "dihapus" ke atas */
+.intro::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--flame);
+  box-shadow: 0 0 18px 3px rgb(108 184 255 / 0.6);
+  opacity: 0;
+}
+
+.intro--keluar {
+  clip-path: inset(0 0 100% 0);
+}
+
+.intro--keluar::after {
+  animation: garis-naik var(--lama-tutup, 700ms) cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+@keyframes garis-naik {
+  from { bottom: 0; opacity: 1; }
+  to { bottom: 100%; opacity: 1; }
+}
+
+.intro__panggung {
+  position: absolute;
+  inset: 0;
+}
+
+/* Setiap bagian adalah satu lapisan di tengah layar.
+   Lapisan tampil saat punya kelas --tampil, dan memudar + blur saat kelas itu hilang. */
+.intro__lapis,
+.intro__akhir {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+}
+
+.intro__lapis {
+  opacity: 0;
+  filter: blur(10px);
+  transition: opacity var(--lama-lapisan, 450ms) ease, filter var(--lama-lapisan, 450ms) ease,
+    transform 650ms ease;
+}
+
+.intro__lapis--tampil {
+  opacity: 1;
+  filter: none;
+}
+
+.intro__teks,
+.intro__nama {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* 1. Persen loading */
+.intro__boot {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+}
+
+.intro__boot:not(.intro__lapis--tampil) {
+  transform: translateY(-1.5rem);
+}
+
+.intro__persen {
+  font-size: clamp(5rem, 16vw, 11rem);
+  font-stretch: 62%;
+  font-weight: 800;
+  line-height: 0.9;
+  color: var(--flame);
+}
+
+.intro__bar {
+  width: min(70vw, 26rem);
+  height: 2px;
+  margin-block: 1.25rem 1rem;
+  background: var(--trace);
+  overflow: hidden;
+}
+
+.intro__bar span {
+  display: block;
+  height: 100%;
+  background: var(--flame);
+  transform-origin: left;
+}
+
+.intro__log {
+  width: min(70vw, 26rem);
+  min-height: 8.5em;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--silk-dim);
+  white-space: pre-wrap;
+}
+
+/* Huruf muncul / hilang dengan blur */
+.huruf {
+  display: inline-block;
+  animation: huruf-masuk var(--lama-huruf-masuk, 500ms) cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.huruf--diam {
+  animation: none;
+}
+
+@keyframes huruf-masuk {
+  from {
+    opacity: 0;
+    filter: blur(12px);
+    transform: translateY(0.18em) scale(1.08);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+
+@keyframes huruf-keluar {
+  from { opacity: 1; filter: blur(0); }
+  to { opacity: 0; filter: blur(12px); transform: translateY(-0.15em); }
+}
+
+/* 2. "Halo semuanya" → "Halo, dunia" */
+.intro__sapa {
+  font-size: clamp(1.75rem, 6vw, 4.75rem);
+  font-stretch: 125%;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+}
+
+/* Wadah akhiran: lebarnya dianimasikan agar "Halo" bergeser mulus */
+.intro__akhiran {
+  position: relative;
+  display: inline-block;
+  height: 1.2em;
+  transition: width var(--geser-halo, 900ms) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.intro__akhiran-isi,
+.intro__ukur {
+  position: absolute;
+  left: 0;
+  top: 0;
+  white-space: nowrap;
+}
+
+.intro__ukur {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.intro__akhiran-isi--keluar .huruf {
+  animation: huruf-keluar var(--lama-huruf-keluar, 320ms) ease both;
+  animation-delay: calc(var(--i, 0) * 22ms);
+}
+
+/* 3. "Saya" */
+.intro__saya {
+  font-size: clamp(1.5rem, 4vw, 2.75rem);
+  font-weight: 600;
+  color: var(--silk-dim);
+}
+
+/* 4. Nama lengkap, lalu hanya "Isa" yang tersisa dan menyala */
+.intro__nama {
+  font-size: clamp(1.75rem, 6.4vw, 5.5rem);
+  font-stretch: 62%;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.intro__nama--besar {
+  transform: scale(1.8);
+}
+
+.intro__ch {
+  display: inline-block;
+  transition: opacity var(--lama-huruf-lain, 500ms) ease, filter var(--lama-huruf-lain, 500ms) ease,
+    color 400ms ease, text-shadow 400ms ease;
+}
+
+.intro__nama--sorot .intro__ch--lain {
+  opacity: 0.18;
+}
+
+/* Huruf lain hanya memudar & blur di tempatnya (lebarnya tidak berubah),
+   sehingga "ISA" tetap diam di posisinya. */
+.intro__nama--kumpul .intro__ch--lain {
+  opacity: 0;
+  filter: blur(8px);
+}
+
+.intro__nama--sorot .intro__ch--panggil {
+  color: var(--flame);
+  text-shadow: 0 0 28px rgb(108 184 255 / 0.6);
+}
+
+/* 5. "ISA" raksasa, lalu foto muncul di tengahnya */
+.intro__akhir {
+  display: grid;
+  place-items: center;
+}
+
+.intro__raksasa {
+  grid-area: 1 / 1;
+  margin: 0;
+  font-size: clamp(9rem, 44vw, 34rem);
+  font-stretch: 62%;
+  font-weight: 800;
+  line-height: 0.78;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--silk);
+  opacity: 0;
+  transform: scale(0.35);
+  filter: blur(8px);
+  transition: opacity 500ms ease, transform 900ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 500ms ease, color 900ms ease;
+}
+
+.intro__akhir--besar .intro__raksasa {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* Saat foto muncul, huruf raksasa meredup menjadi latar */
+.intro__akhir--foto .intro__raksasa {
+  color: #2c6250;
+}
+
+.intro__foto {
+  grid-area: 1 / 1;
+  position: relative;
+  height: min(60vh, 132vw);
+  aspect-ratio: 800 / 1029;
+}
+
+/* Jendela terbuka dari tengah + zoom halus; isi kanvas berubah dari piksel ke tajam */
+.intro__foto canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  clip-path: inset(50% 0 50% 0);
+  transform: scale(1.12);
+  mask-image: linear-gradient(to bottom, #000 74%, transparent 99%);
+  transition: clip-path var(--lama-buka-foto, 850ms) cubic-bezier(0.76, 0, 0.24, 1),
+    transform 1400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.intro__foto--muncul canvas {
+  clip-path: inset(0 0 0 0);
+  transform: none;
+}
+
+/* Sudut jendela bidik */
+.intro__sudut {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 0 solid var(--flame);
+  opacity: 0;
+  transition: opacity 300ms ease, transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.intro__sudut--1 { top: -12px; left: -12px; border-top-width: 2px; border-left-width: 2px; transform: translate(-16px, -16px); }
+.intro__sudut--2 { top: -12px; right: -12px; border-top-width: 2px; border-right-width: 2px; transform: translate(16px, -16px); }
+.intro__sudut--3 { bottom: 8%; left: -12px; border-bottom-width: 2px; border-left-width: 2px; transform: translate(-16px, 16px); }
+.intro__sudut--4 { bottom: 8%; right: -12px; border-bottom-width: 2px; border-right-width: 2px; transform: translate(16px, 16px); }
+
+.intro__foto--muncul .intro__sudut {
+  opacity: 1;
+  transform: none;
+}
+
+.intro__identitas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 7vh;
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  opacity: 0;
+  transform: translateY(0.75rem);
+  transition: opacity 500ms ease 450ms, transform 700ms cubic-bezier(0.16, 1, 0.3, 1) 450ms;
+}
+
+.intro__akhir--foto .intro__identitas {
+  opacity: 1;
+  transform: none;
+}
+
+.intro__garis {
+  width: 3rem;
+  height: 2px;
+  margin-bottom: 0.5rem;
+  background: var(--flame);
+}
+
+.intro__nama-kecil {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 650;
+}
+
+.intro__peran {
+  margin: 0;
+  font-size: 0.875rem;
+  font-stretch: 125%;
+  color: var(--copper);
+}
+
+.intro__lewati {
+  position: absolute;
+  z-index: 1;
+  right: var(--gutter);
+  bottom: 1.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--trace);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--silk-dim);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.intro__lewati:hover {
+  color: var(--silk);
+  border-color: var(--silk-dim);
+}
+
+@media (max-width: 600px) {
+  .intro__foto {
+    height: min(56vh, 96vw);
+  }
+
+  .intro__identitas {
+    bottom: 5.5rem;
+  }
+}
+
+/* ---------- Blok umum ---------- */
+.blok {
+  padding-block: clamp(4rem, 9vw, 7.5rem);
+  border-top: 1px solid var(--trace);
+}
+
+.judul-blok {
+  font-size: clamp(2.125rem, 4.8vw, 3.5rem);
+  font-stretch: 75%;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.blok__pengantar {
+  color: var(--silk-dim);
+  max-width: 40rem;
+  margin-top: -1rem;
+  margin-bottom: 2rem;
+}
+
+.daftar {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.daftar li {
+  position: relative;
+  padding-left: 1.25rem;
+  max-width: 62ch;
+}
+
+/* Penanda daftar berbentuk pad tembaga */
+.daftar li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 2px;
+  background: var(--copper);
+}
+
+/* ---------- Aksen jalur PCB per bagian (JalurBagian.jsx) ----------
+   Bundel lima jalur hijau di ruang kosong atas bagian, masuk dari tepi layar
+   (kanan/kiri bergantian). Tergambar SEKALI saat bagian masuk layar (kelas
+   --tergambar); parallax ditulis langsung sebagai transform saat menggulir. */
+.blok,
+.replay {
+  position: relative;
+}
+
+.jalur-bagian {
+  position: absolute;
+  z-index: -1;
+  top: clamp(0.5rem, 1.6vw, 1.5rem);
+  width: min(64vw, 920px);
+  height: auto;
+  overflow: visible;
+  pointer-events: none;
+  will-change: transform; /* parallax ditulis langsung oleh JalurBagian.jsx */
+}
+
+.jalur-bagian--kanan {
+  right: calc(50% - 50vw);
+}
+
+.jalur-bagian--kiri {
+  left: calc(50% - 50vw);
+}
+
+/* Jalur tergambar sekali, bergantian: jalur ke-i mulai 130 ms lebih lambat.
+   1100ms = lama satu jalur tergambar, 130ms = jeda antar jalur. */
+.jalur-bagian__jejak {
+  fill: none;
+  stroke: #33725a;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1100ms cubic-bezier(0.65, 0, 0.35, 1) calc(var(--i, 0) * 130ms);
+}
+
+.jalur-bagian--tergambar .jalur-bagian__jejak {
+  stroke-dashoffset: 0;
+}
+
+/* Via & pad muncul saat jalurnya sampai */
+.jalur-bagian__ujung {
+  fill: #3d8466;
+  opacity: 0;
+  transition: opacity 400ms ease calc(var(--i, 0) * 130ms + 950ms);
+}
+
+.jalur-bagian--tergambar .jalur-bagian__ujung {
+  opacity: 1;
+}
+
+.jalur-bagian__lubang {
+  fill: var(--board);
+}
+
+.jalur-bagian__sablon {
+  fill: none;
+  stroke: rgb(238 241 232 / 0.4);
+  stroke-width: 1;
+}
+
+.jalur-bagian__sablon text {
+  fill: rgb(238 241 232 / 0.5);
+  stroke: none;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+/* Sinyal biru yang sesekali mengalir masuk setelah jalur tergambar penuh */
+.jalur-bagian__sinyal {
+  fill: none;
+  stroke: var(--flame);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 0.03 1;
+  stroke-dashoffset: 0.035;
+  opacity: 0;
+}
+
+.jalur-bagian--hidup .jalur-bagian__sinyal {
+  animation: pcb-sinyal 6s linear infinite;
+}
+
+.jalur-bagian--hidup .jalur-bagian__sinyal--2 {
+  animation-delay: 2.2s;
+}
+
+@media (max-width: 760px) {
+  .jalur-bagian {
+    width: 84vw;
+  }
+
+  /* Gambar diperkecil di HP, jadi garis ditebalkan agar tetap terlihat */
+  .jalur-bagian__jejak,
+  .jalur-bagian__sinyal {
+    stroke-width: 4;
+  }
+}
+
+/* ---------- Animasi muncul (Muncul.jsx) ----------
+   Hanya aktif jika <html> punya kelas js-muncul (lihat main.jsx).
+   Blok ber-atribut data-muncul terbuka dari atas ke bawah dengan tepi lembut
+   dan garis pindai biru, sekali saja. --tunda = jeda untuk efek berurutan. */
+@property --sapu {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 100%;
+}
+
+.js-muncul [data-muncul] {
+  position: relative;
+}
+
+.js-muncul [data-muncul]:not(.muncul--selesai) {
+  --sapu: -16%;
+  mask-image: linear-gradient(to bottom, #000 var(--sapu), transparent calc(var(--sapu) + 16%));
+  transition: --sapu 800ms cubic-bezier(0.65, 0, 0.35, 1) var(--tunda, 0ms);
+}
+
+.js-muncul [data-muncul].muncul:not(.muncul--selesai) {
+  --sapu: 100%;
+}
+
+/* Garis pindai yang mengikuti tepi sapuan */
+.js-muncul [data-muncul]:not(.muncul--selesai)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--sapu);
+  height: 1px;
+  background: var(--flame);
+  box-shadow: 0 0 10px 1px rgb(108 184 255 / 0.6);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.js-muncul [data-muncul].muncul:not(.muncul--selesai)::after {
+  opacity: 1;
+}
+
+/* Foto yang muncul dari piksel ke tajam */
+.foto-muncul {
+  position: relative;
+  display: block;
+}
+
+.foto-muncul canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius);
+  pointer-events: none;
+}
+
+.js-muncul .foto-muncul:not(.foto-muncul--selesai) img {
+  visibility: hidden;
+}
+
+/* ---------- Tentang ---------- */
+.tentang {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 2rem;
+}
+
+.tentang__isi {
+  display: grid;
+  gap: 1.1rem;
+  max-width: 62ch;
+  font-size: 1.125rem;
+}
+
+.kata {
+  color: rgb(238 241 232 / 0.24);
+  transition: color 300ms ease;
+}
+
+.kata--nyala {
+  color: var(--silk);
+}
+
+.tentang__isi p:last-child .kata--nyala {
+  color: var(--copper);
+}
+
+@media (max-width: 760px) {
+  .tentang {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+/* ---------- Replay 7 hari ----------
+   Tinggi normal (tidak menahan gulir). Diputar otomatis saat terlihat;
+   waktunya diatur di src/data/waktuReplay.js. */
+.replay {
+  border-top: 1px solid var(--trace);
+  padding-top: clamp(4rem, 9vw, 7.5rem);
+}
+
+.replay__pengantar {
+  max-width: 44rem;
+  color: var(--silk-dim);
+  font-size: 1.125rem;
+}
+
+.replay__panel {
+  margin-top: clamp(2rem, 4vw, 3rem);
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  grid-template-areas:
+    'hari hari'
+    'kiri sisi'
+    'api api';
+  column-gap: clamp(1.5rem, 4vw, 3.5rem);
+  row-gap: 1.25rem;
+}
+
+.replay__hari {
+  grid-area: hari;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+}
+
+.replay__hari-angka {
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  font-stretch: 75%;
+  font-weight: 750;
+  line-height: 1.1;
+}
+
+.replay__tanggal {
+  color: var(--silk-dim);
+}
+
+/* Teks yang berganti tiap hari muncul dengan halus */
+.replay__hari-angka,
+.replay__tanggal,
+.replay__ket {
+  animation: ganti-halus 450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes ganti-halus {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+.replay__kiri {
+  grid-area: kiri;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.replay__grafik {
+  border: 1px solid var(--trace);
+  border-radius: var(--radius);
+  background: var(--board-inset);
+  padding: 0.75rem 0.5rem 0.25rem;
+}
+
+.grafik {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.grafik__grid {
+  stroke: var(--trace);
+  stroke-width: 1;
+}
+
+.grafik__batas {
+  stroke: var(--copper);
+  stroke-width: 1.25;
+  stroke-dasharray: 5 5;
+}
+
+.grafik__label-batas {
+  fill: var(--copper);
+  font-size: 12px;
+}
+
+.grafik__sumbu {
+  fill: var(--silk-dim);
+  font-size: 12px;
+}
+
+.grafik__garis {
+  fill: none;
+  stroke: var(--flame);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.grafik__titik {
+  fill: var(--board-inset);
+  stroke: var(--flame);
+  stroke-width: 2;
+  r: 4.5px;
+  transition: r 300ms ease, fill 300ms ease;
+}
+
+.grafik__titik--aktif {
+  r: 7px;
+  fill: var(--flame);
+}
+
+.grafik__kursor {
+  stroke: var(--silk);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.replay__kontrol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.replay__putar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  height: 2.5rem;
+  padding: 0 1.1rem 0 0.9rem;
+  border: 1px solid var(--copper);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--copper);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 200ms ease;
+}
+
+.replay__putar:hover {
+  background: rgb(217 160 91 / 0.1);
+}
+
+.replay__ikon--putar {
+  width: 0;
+  height: 0;
+  border-left: 9px solid currentColor;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+
+.replay__ikon--jeda {
+  width: 9px;
+  height: 11px;
+  border-left: 3px solid currentColor;
+  border-right: 3px solid currentColor;
+}
+
+.replay__hari-tombol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.replay__tombol {
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--trace);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--silk-dim);
+  font: inherit;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease;
+}
+
+.replay__tombol:hover {
+  border-color: var(--silk-dim);
+  color: var(--silk);
+}
+
+.replay__tombol[aria-current] {
+  background: var(--copper);
+  border-color: var(--copper);
+  color: var(--board);
+  font-weight: 650;
+}
+
+.replay__sisi {
+  grid-area: sisi;
+  align-self: center;
+}
+
+.bacaan {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem 1.5rem;
+}
+
+.bacaan__sel {
+  border-top: 1px solid var(--trace);
+  padding-top: 0.6rem;
+}
+
+.bacaan__sel dt {
+  font-size: 0.875rem;
+  color: var(--silk-dim);
+}
+
+.bacaan__sel dd {
+  color: var(--silk-dim);
+}
+
+.bacaan__nilai {
+  font-size: clamp(1.75rem, 3.4vw, 2.625rem);
+  font-stretch: 75%;
+  font-weight: 650;
+  line-height: 1.1;
+  color: var(--silk);
+}
+
+.bacaan__sel--utama {
+  border-top-color: var(--flame);
+}
+
+.bacaan__sel--utama .bacaan__nilai {
+  color: var(--flame);
+}
+
+.replay__ket {
+  margin-top: 1.5rem;
+  min-height: 4.8em;
+  max-width: 34rem;
+}
+
+/* Kartu foto api: tempatnya sudah disiapkan sejak awal (tidak ada lompatan
+   tata letak). Buram & redup sampai replay mencapai hari terakhir. */
+.replay__api {
+  grid-area: api;
+  display: grid;
+  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+  gap: 1.25rem 2rem;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--trace);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--board-inset);
+}
+
+.replay__api-foto {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius);
+}
+
+.replay__api-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 30% 40%;
+  filter: blur(10px) grayscale(0.7) brightness(0.4);
+  transform: scale(1.08);
+  transition: filter 1100ms ease, transform 1400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.replay__api--muncul .replay__api-foto img {
+  filter: none;
+  transform: none;
+}
+
+.replay__api-tunggu {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--silk-dim);
+  transition: opacity 500ms ease;
+}
+
+.replay__api--muncul .replay__api-tunggu {
+  opacity: 0;
+}
+
+/* Garis pindai sekali lewat saat foto menjadi tajam */
+.replay__api-pindai {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.replay__api-pindai::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: var(--flame);
+  box-shadow: 0 0 14px 2px rgb(108 184 255 / 0.7);
+}
+
+.replay__api--muncul .replay__api-pindai {
+  animation: api-pindai 1100ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes api-pindai {
+  0% { transform: translateY(0); opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+
+.replay__api figcaption {
+  display: grid;
+  gap: 0.4rem;
+  opacity: 0.35;
+  transform: translateY(0.5rem);
+  transition: opacity 600ms ease 300ms, transform 800ms cubic-bezier(0.16, 1, 0.3, 1) 300ms;
+}
+
+.replay__api--muncul figcaption {
+  opacity: 1;
+  transform: none;
+}
+
+.replay__api figcaption strong {
+  font-size: 1.5rem;
+  font-stretch: 85%;
+  line-height: 1.2;
+}
+
+.kredit {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--silk-dim);
+}
+
+.replay__kaki {
+  padding-top: clamp(2.5rem, 5vw, 3.5rem);
+  padding-bottom: clamp(4rem, 9vw, 7.5rem);
+}
+
+.ringkasan {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  border-top: 1px solid var(--trace);
+  padding-top: 1.5rem;
+}
+
+.ringkasan li {
+  color: var(--silk-dim);
+  font-size: 0.9375rem;
+}
+
+.ringkasan strong {
+  display: block;
+  color: var(--silk);
+  font-size: 1.5rem;
+  font-stretch: 80%;
+  font-weight: 650;
+}
+
+.catatan {
+  margin-top: 1.5rem;
+  max-width: 62ch;
+  font-size: 0.875rem;
+  color: var(--silk-dim);
+}
+
+@media (max-width: 900px) {
+  .replay__panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'hari' 'kiri' 'sisi' 'api';
+    row-gap: 0.9rem;
+  }
+
+  .grafik__sumbu,
+  .grafik__label-batas {
+    font-size: 20px;
+  }
+
+  .bacaan {
+    gap: 0.75rem 1rem;
+  }
+
+  .bacaan__nilai {
+    font-size: 1.75rem;
+  }
+
+  .replay__ket {
+    margin-top: 0.75rem;
+    font-size: 0.9375rem;
+  }
+
+  .replay__hari-tombol {
+    gap: 0.3rem;
+  }
+
+  .replay__tombol {
+    min-width: 2.2rem;
+    padding: 0 0.4rem;
+  }
+
+  .replay__api {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .replay__api figcaption strong {
+    font-size: 1.25rem;
+  }
+
+  .ringkasan {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Proyek ---------- */
+.proyek {
+  padding-block: clamp(2.5rem, 5vw, 4rem);
+}
+
+.proyek + .proyek {
+  border-top: 1px solid var(--trace);
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.proyek__kepala {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'tahun nama'
+    'tahun info';
+  column-gap: clamp(1.25rem, 3vw, 2.5rem);
+  margin-bottom: 2rem;
+}
+
+.proyek__tahun {
+  grid-area: tahun;
+  font-size: clamp(3.5rem, 10vw, 8rem);
+  font-stretch: 62%;
+  font-weight: 800;
+  line-height: 0.85;
+  color: var(--trace);
+}
+
+.proyek__nama {
+  grid-area: nama;
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  font-stretch: 85%;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+.proyek__nama span {
+  display: block;
+  font-size: 1.125rem;
+  font-stretch: 100%;
+  font-weight: 450;
+  color: var(--silk-dim);
+  margin-top: 0.35rem;
+}
+
+.info {
+  grid-area: info;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2rem;
+}
+
+.info dt {
+  font-size: 0.8125rem;
+  color: var(--silk-dim);
+}
+
+.info dd {
+  font-weight: 550;
+}
+
+.info--tumpuk {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.info--tumpuk dd {
+  font-weight: 450;
+  max-width: 62ch;
+}
+
+@media (max-width: 600px) {
+  .proyek__kepala {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'tahun' 'nama' 'info';
+  }
+
+  .proyek__tahun {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Galeri foto Smart Biogas: flex-grow = rasio foto (diatur di JSX),
+   sehingga semua foto dalam satu baris tingginya sama tanpa terpotong. */
+.galeri {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.galeri__item {
+  flex-basis: 0;
+  min-width: 0;
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+}
+
+.galeri__item img {
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--trace);
+}
+
+.galeri figcaption {
+  font-size: 0.875rem;
+  color: var(--silk-dim);
+}
+
+@media (max-width: 760px) {
+  .galeri__item--3 {
+    flex-basis: 100%;
+  }
+}
+
+/* Diagram alur dan blok */
+.alur,
+.blokdiag {
+  margin-bottom: 2.5rem;
+}
+
+.alur figcaption,
+.blokdiag figcaption {
+  margin-top: 0.85rem;
+  font-size: 0.875rem;
+  color: var(--silk-dim);
+}
+
+.alur__rantai {
+  display: flex;
+  align-items: stretch;
+  gap: 1.75rem;
+}
+
+.alur__rantai > li,
+.alur__dalam > li {
+  position: relative;
+}
+
+/* Garis penghubung antar simpul */
+.alur__rantai > li + li::before,
+.alur__dalam > li + li::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: 1.75rem;
+  border-top: 1.5px solid var(--silk-dim);
+}
+
+/* Paket data biru: berjalan tiap 2 detik saat diagram terlihat */
+.alur__rantai > li + li::after,
+.alur__dalam > li + li::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: var(--flame);
+  box-shadow: 0 0 8px var(--flame);
+  opacity: 0;
+}
+
+.alur--aktif .alur__rantai > li + li::after,
+.alur--aktif .alur__dalam > li + li::after {
+  animation: paket 2s linear infinite;
+  animation-delay: calc(var(--i, 0) * 0.35s);
+}
+
+@keyframes paket {
+  0% { transform: translateX(-1.75rem); opacity: 0; }
+  8% { opacity: 1; }
+  40% { transform: translateX(0); opacity: 1; }
+  46%, 100% { transform: translateX(0); opacity: 0; }
+}
+
+@keyframes paket-turun {
+  0% { transform: translateY(-1.25rem); opacity: 0; }
+  8% { opacity: 1; }
+  40% { transform: translateY(0); opacity: 1; }
+  46%, 100% { transform: translateY(0); opacity: 0; }
+}
+
+.alur__grup {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  padding-top: 0.5rem;
+  border: 1.5px dashed var(--copper);
+  border-radius: calc(var(--radius) + 4px);
+}
+
+.alur__grup-label {
+  font-size: 0.8125rem;
+  color: var(--copper);
+}
+
+.alur__dalam {
+  display: flex;
+  gap: 1.75rem;
+}
+
+.alur__simpul {
+  display: grid;
+  align-content: center;
+  gap: 0.1rem;
+  min-width: 8.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--trace);
+  border-radius: var(--radius);
+  background: var(--board-raised);
+}
+
+.alur__simpul b {
+  font-weight: 650;
+}
+
+.alur__simpul span {
+  font-size: 0.875rem;
+  color: var(--silk-dim);
+}
+
+.alur__simpul--saya {
+  border-color: var(--copper);
+}
+
+@media (max-width: 900px) {
+  .alur__rantai,
+  .alur__dalam {
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .alur__rantai > li + li::before,
+  .alur__dalam > li + li::before {
+    top: auto;
+    right: auto;
+    bottom: 100%;
+    left: 1.5rem;
+    width: 0;
+    height: 1.25rem;
+    border-top: 0;
+    border-left: 1.5px solid var(--silk-dim);
+  }
+
+  .alur__rantai > li + li::after,
+  .alur__dalam > li + li::after {
+    top: auto;
+    right: auto;
+    bottom: 100%;
+    left: 1.5rem;
+    margin: 0 0 0 -3px;
+  }
+
+  .alur--aktif .alur__rantai > li + li::after,
+  .alur--aktif .alur__dalam > li + li::after {
+    animation-name: paket-turun;
+  }
+}
+
+.blokdiag__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    'a c d'
+    'b c d';
+  gap: 1rem 2rem;
+  max-width: 44rem;
+}
+
+.blokdiag__a { grid-area: a; }
+.blokdiag__b { grid-area: b; }
+.blokdiag__c { grid-area: c; }
+.blokdiag__d { grid-area: d; }
+
+.blokdiag__a::after,
+.blokdiag__b::after,
+.blokdiag__c::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  width: 2rem;
+  border-top: 1.5px solid var(--silk-dim);
+}
+
+.blokdiag__grid > div {
+  position: relative;
+}
+
+@media (max-width: 600px) {
+  .blokdiag__grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'a' 'b' 'c' 'd';
+  }
+
+  .blokdiag__a::after,
+  .blokdiag__b::after,
+  .blokdiag__c::after {
+    display: none;
+  }
+}
+
+/* Gelas Pintar */
+.gelas {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2rem 3rem;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+
+.lcd-bingkai {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+}
+
+.lcd-bingkai figcaption {
+  font-size: 0.875rem;
+  color: var(--silk-dim);
+}
+
+.lcd {
+  display: grid;
+  padding: 1rem 1.15rem;
+  border-radius: 6px;
+  background-color: var(--lcd);
+  background-image: repeating-linear-gradient(
+      90deg,
+      rgb(34 53 26 / 0.06) 0 1px,
+      transparent 1px 4px
+    ),
+    repeating-linear-gradient(0deg, rgb(34 53 26 / 0.06) 0 1px, transparent 1px 4px);
+  box-shadow: 0 0 0 10px #0a1612, 0 0 0 11px var(--trace);
+  margin: 11px;
+  color: var(--lcd-ink);
+  font-family: var(--mono);
+  font-size: clamp(1rem, 2.4vw, 1.25rem);
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+  white-space: pre;
+  width: max-content;
+}
+
+@media (max-width: 760px) {
+  .gelas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Tiga kolom isi proyek */
+.tiga-kolom {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.tiga-kolom h4,
+.pelajaran h4 {
+  font-size: 1rem;
+  font-weight: 650;
+  font-stretch: 110%;
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--trace);
+  margin-bottom: 0.85rem;
+}
+
+.tiga-kolom p + p {
+  margin-top: 0.85rem;
+}
+
+.pelajaran {
+  margin-top: 2.5rem;
+  max-width: 48rem;
+}
+
+.pelajaran h4 {
+  border-top-color: var(--flame);
+}
+
+.kredit-proyek {
+  margin-top: 2rem;
+  font-size: 0.9375rem;
+  color: var(--silk-dim);
+  max-width: 62ch;
+}
+
+@media (max-width: 900px) {
+  .tiga-kolom {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+/* ---------- Pengalaman ---------- */
+.kp {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+.kp__posisi {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-stretch: 85%;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.kp__tempat {
+  font-size: 1.125rem;
+  margin-top: 0.25rem;
+}
+
+.kp__waktu {
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+}
+
+.kp__angka {
+  margin-block: 1.75rem;
+}
+
+.kp__angka dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.kp__angka dl > div {
+  border-top: 1px solid var(--trace);
+  padding-top: 0.5rem;
+}
+
+.kp__angka dt {
+  font-size: 0.875rem;
+  color: var(--silk-dim);
+}
+
+.kp__angka dd {
+  font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+  font-stretch: 75%;
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.kp__angka figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--silk-dim);
+}
+
+.kp__penghubung {
+  margin-top: 1.75rem;
+  max-width: 56ch;
+  color: var(--copper);
+}
+
+.kp__foto {
+  display: grid;
+  gap: 0.5rem;
+  position: sticky;
+  top: 6rem;
+}
+
+.kp__foto img {
+  width: 100%;
+  max-height: 78vh;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--trace);
+}
+
+.kp__foto figcaption {
+  font-size: 0.875rem;
+  color: var(--silk-dim);
+}
+
+@media (max-width: 860px) {
+  .kp {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kp__foto {
+    position: static;
+    max-width: 26rem;
+  }
+}
+
+/* ---------- Keahlian ---------- */
+.keahlian__baris {
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  gap: 0.25rem 2rem;
+  padding-block: 1.1rem;
+  border-top: 1px solid var(--trace);
+}
+
+.keahlian__baris dt {
+  font-weight: 650;
+}
+
+.keahlian__baris dd {
+  max-width: 62ch;
+}
+
+.keahlian__dipakai {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.875rem;
+  color: var(--silk-dim);
+}
+
+.keahlian__baris--belajar dt {
+  color: var(--silk);
+}
+
+@media (max-width: 640px) {
+  .keahlian__baris {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Pendidikan ---------- */
+.pendidikan h3 {
+  font-size: clamp(1.375rem, 2.6vw, 1.875rem);
+  font-stretch: 85%;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.pendidikan dt {
+  font-size: 0.875rem;
+  color: var(--silk-dim);
+}
+
+/* ---------- Kontak & kaki halaman ---------- */
+.kontak {
+  border-top: 1px solid var(--trace);
+  background: var(--board-inset);
+  padding-block: clamp(4rem, 9vw, 7.5rem) clamp(4rem, 8vw, 6rem);
+}
+
+.kontak__teks {
+  max-width: 44rem;
+  font-size: 1.125rem;
+  color: var(--silk-dim);
+  margin-bottom: 2.5rem;
+}
+
+.kontak__daftar li {
+  display: grid;
+  grid-template-columns: minmax(0, 8rem) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 1rem;
+  padding-block: 1rem;
+  border-top: 1px solid var(--trace);
+}
+
+.kontak__label {
+  font-size: 0.9375rem;
+  color: var(--silk-dim);
+}
+
+.kontak__daftar a {
+  font-size: clamp(1.25rem, 2.8vw, 1.875rem);
+  font-weight: 600;
+  font-stretch: 90%;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.kontak__daftar a:hover {
+  color: var(--copper);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+/* ---------- Kaki halaman ----------
+   Pita tersendiri yang lebih gelap, dengan deretan pad tembaga di tepi atas
+   (seperti konektor di tepi papan PCB) dan isi berbentuk "kotak judul"
+   gambar teknik. Sengaja berbeda dari baris-baris besar "Hubungi saya". */
+.kaki {
+  position: relative;
+  padding-bottom: 2rem;
+  background: #06140e;
+}
+
+/* Garis pembatas: jalur tembaga PCB (SVG di Kaki.jsx) */
+.kaki__jalur {
+  display: block;
+  width: 100%;
+  height: 64px;
+  margin-bottom: 1.5rem;
+}
+
+.pcb__tembaga {
+  fill: none;
+  stroke: var(--copper);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.pcb__pad,
+.pcb__via-kecil circle {
+  fill: var(--copper);
+}
+
+.pcb__via-kecil {
+  opacity: 0.45;
+}
+
+.pcb__lubang,
+.pcb__via-kecil .pcb__lubang {
+  fill: #06140e;
+}
+
+.pcb__sablon {
+  fill: none;
+  stroke: rgb(238 241 232 / 0.75);
+  stroke-width: 1;
+}
+
+.pcb__sablon text {
+  fill: rgb(238 241 232 / 0.75);
+  stroke: none;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
+/* Sinyal biru yang sesekali lewat (hanya saat footer terlihat) */
+.pcb__sinyal {
+  fill: none;
+  stroke: var(--flame);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 0.025 1;
+  stroke-dashoffset: 0.03;
+  opacity: 0;
+}
+
+.kaki__jalur--aktif .pcb__sinyal {
+  animation: pcb-sinyal 7s linear infinite;
+}
+
+.kaki__jalur--aktif .pcb__sinyal--2 {
+  animation-delay: 0.35s;
+}
+
+@keyframes pcb-sinyal {
+  0% { stroke-dashoffset: 0.03; opacity: 1; }
+  45% { stroke-dashoffset: -1; opacity: 1; }
+  46%, 100% { stroke-dashoffset: -1; opacity: 0; }
+}
+
+.kaki__isi {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  border: 1px solid var(--trace);
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.kaki__blok {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr) minmax(0, 1fr);
+}
+
+.kaki__sel {
+  display: grid;
+  align-content: start;
+  gap: 0.15rem;
+  padding: 0.75rem 1rem;
+  border-right: 1px solid var(--trace);
+}
+
+.kaki__sel dt {
+  font-size: 0.75rem;
+  color: var(--silk-dim);
+}
+
+.kaki__sel dd {
+  color: var(--silk);
+}
+
+.kaki__naik {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1.4rem;
+  color: var(--silk-dim);
+  text-decoration: none;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+/* Panah kecil ke atas */
+.kaki__naik::after {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-top: 0.2rem;
+  border-top: 1.5px solid currentColor;
+  border-left: 1.5px solid currentColor;
+  rotate: 45deg;
+}
+
+.kaki__naik:hover {
+  color: var(--silk);
+  background: var(--board-raised);
+}
+
+@media (max-width: 760px) {
+  .kaki__isi {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kaki__blok {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .kaki__sel {
+    border-bottom: 1px solid var(--trace);
+  }
+
+  .kaki__sel:last-child {
+    border-right: 0;
+  }
+
+  .kaki__sel:first-child {
+    grid-column: 1 / -1;
+    border-right: 0;
+  }
+
+  .kaki__naik {
+    justify-content: flex-start;
+    padding-inline: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .kontak__daftar li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.15rem;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .jejak--nyala,
+  .pindai__jalur,
+  .pindai__fokus {
+    display: none;
+  }
+}
